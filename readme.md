@@ -1,3 +1,3 @@
 # Brezenham algo (parabola)
 
-ai da barash, ai da ove4dii cheese
+ai da barash, ai da ove4ii cbIp
