@@ -7,4 +7,4 @@ def rotate_point(p, al):
 
 
 def translation(p, p_n):
-    return p[0] - p_n[0], p[1] - p_n[1]
+    return p[0] + p_n[0], p[1] + p_n[1]
