@@ -9,8 +9,14 @@ def f(x):
 
 
 def distPoints(x1, y1, x2, y2):
-    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)    
-    
+    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+
+
+def detectSign(point):
+    print ((fY2 - fY1) * (point[0] - fX1) - (fX2 - fX1) *(point[1] - fY1))
+    return (fY2 - fY1) * (point[0] - fX1) - (fX2 - fX1) *(point[1] - fY1)
+
+
 def findFocus():
     A,B,C,D,E,F = (a, -1/2, 0, (b+a*d)/2, -d/2, b*d+c) #true
     g = numpy.linalg.det([[ A, B, D],
@@ -34,63 +40,77 @@ def findFocus():
     al =  alN #90-
     delta = 2*nA
     x0y0 = sympy.solve_poly_system([A*symx + B*symy + D, B*symx + C*symy + E], symx, symy)
-   # print(x0y0)
+    #print(x0y0)
     x0 = x0y0[0][0]
     y0 = x0y0[0][1]
 
+    global fX1, fY1, fX2, fY2, xM1, yM1, yM2, xM2
     fX1 = cF * math.cos(al) + x0
     fY1 = cF *math.sin(al) + y0
     fX2 = -cF * math.cos(al) + x0
     fY2 = -cF *math.sin(al) + y0
-    xK   = sympy.Symbol('x')
+    xK = sympy.Symbol('x')
     m = fY2 - fY1
     n = fX2 - fX1
+
     Q0 = m/n - a
-    Q1 = m * d / n - fX1 * m / n - fY1 - a*d - b
-    Q2 = -fY1 * d - b*d -c
+    Q1 = m * d / n - fX1 * m / n + fY1 - a*d - b
+    Q2 = -fX1 * d *m/n - b*d -c +fY1*d
+   # print (Q0, Q1, Q2)
     temp = sympy.solvers.solve(Q0*xK**2 + xK * Q1 + Q2, xK)
-    print (temp)
+    print (sympy.solvers.solve((xK - fX1)*m/n + fY1 - a*xK - b - c/(xK+d), xK))
+   # print (temp, '---------/')
     xM1 = temp[0]
     yM1 = f(xM1)
     xM2 = temp[1]
     yM2 = f(xM2)
-    x = xM1
-    y = yM1
-
-    while x < xMax/2 and y< yMax/2:
-        v1 = abs(abs(distPoints(fX1, fY1, x+1, y) - distPoints(fX2, fY2, x+1, y)) - delta)
-        v2 = abs(abs(distPoints(fX1, fY1, x, y+1) - distPoints(fX2, fY2, x, y+1)) - delta)
-        if v1 < v2:
-            x += 1
+    print (detectSign((xM1, yM1)), '----')
+    x = xM2
+    y = yM2
+    f1 = lambda x, y: (x-1, y+1)
+    f2 = lambda x, y: (x, y+1)
+    f3 = lambda x, y: (x+1, y+1)
+    f4 = lambda x, y: (x-1, y)
+    f5 = lambda x, y: (x+1, y)
+    f6 = lambda x, y: (x-1, y-1)
+    f7 = lambda x, y: (x, y-1)
+    f8 = lambda x, y: (x+1, y-1)
+    transform = [f1, f2, f3, f4, f5, f6, f7, f8]
+    left = []
+    right = []
+    for f0 in transform:
+        if detectSign(f0(x, y))> 0:
+            left.append(f0)
         else:
-            y += 1
-        canv.create_oval(x-1+xMax/2, yMax- (y-1+yMax/2), x+1+xMax/2,yMax-( y+1+yMax/2))
-        canv.pack()
-    x = xM1
-    y = yM1
-    while x < xMax/2 and y > -yMax/2:
-        v1 = abs(abs(distPoints(fX1, fY1, x+1, y) - distPoints(fX2, fY2, x+1, y)) - delta)
-        v2 = abs(abs(distPoints(fX1, fY1, x, y-1) - distPoints(fX2, fY2, x, y-1)) - delta)
-        if v1 < v2:
-            x += 1
-        else:
-            y -= 1
-        canv.create_oval(x-1+xMax/2, yMax- (y-1+yMax/2), x+1+xMax/2,yMax-( y+1+yMax/2))
-        canv.pack()
+            right.append(f0)
+    print (left)
+    print (right)
 
+    x = int(xM1)
+    y = int(yM1)
 
 win = tkinter.Tk()
-xMax = GetSystemMetrics(0)
-yMax = GetSystemMetrics(1)
-
+xMax = GetSystemMetrics(0)/2
+yMax = GetSystemMetrics(1)/2
+#xMax = 100
+#yMax = 100
+print (((yMax-30 )/2, (xMax-10)/2))
 canv = tkinter.Canvas(win, height=yMax-30, width=xMax-10)
-#canv = tkinter.Canvas(win, height=10, width=10)
-#plt.scatter(5 + xMax/2, 1 + yMax/2, s=5)
-a = 1
-b = 1
-c = -1
-d = 0
+a = 0.2
+b = 1.5
+c = 8
+d = 7
 cF = 0
+fX1 = 0
+fY1 = 0
+fX2 = 0
+fY2 = 0
+
+xM1 = 0
+yM1 = 0
+xM2 = 0
+yM2 = 0
+
 findFocus()
 #plt.xlim(-xMax/2, xMax/2)
 #plt.ylim(-yMax/2, yMax/2)
