@@ -26,13 +26,12 @@ class Curve:
                                        symx * symy - inv2,
                                        symx * symy * symz - inv3],
                                       symx, symy, symz)
-        coeffs = list(filter(lambda x: x[1]*x[2] >= 0, ans))
+        coeffs = list(filter(lambda x: x[1] * x[2] >= 0, ans))
         if coeffs is None:
             raise HyperbolaException("not a hyp")
         coeffs = coeffs[0]
         if coeffs[0] < 0 and coeffs[1] > 0 and coeffs[2] > 0:
             coeffs = [-x for x in coeffs]
-            rotate_angle -= pi/2
         A1 = coeffs[0]
         C1 = coeffs[1]
         F1 = -coeffs[2]
@@ -47,6 +46,15 @@ class Curve:
         self.focuses = [geom.full_translation(x, new_point, rotate_angle)
                         for x in [(-c_can, 0), (c_can, 0)]]
         line = (tan(rotate_angle), -1, 0)
+
+        if not self.self_check():
+            self.starting_points = [geom.rotate_point(x, -pi / 2)
+                                    for x in self.starting_points]
+            self.focuses = [geom.rotate_point(x, -pi / 2)
+                            for x in self.focuses]
+            line = (tan(rotate_angle - pi / 2), -1, 0)
+        if not self.self_check():
+            raise HyperbolaException("wrong starting points")
         self.left_points, self.right_points = geom.get_left_right_points(line)
 
     def insert_point_into_curve(self, p):
@@ -60,8 +68,7 @@ class Curve:
             t = abs(self.insert_point_into_curve(x))
             ch1 = abs(self.insert_point_into_curve(x)) < 1e-8
             ch2 = self.get_distance_from_focuses(x) < 1e-8
-            if not (ch1 and ch2):
-                raise HyperbolaException("wrong starting points")
+            return ch1 and ch2
 
     def get_distance_from_focuses(self, p):
         return abs(abs(geom.dist(p, self.focuses[0]) - geom.dist(p, self.focuses[1])) - self.delta)
