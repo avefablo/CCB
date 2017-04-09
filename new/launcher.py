@@ -22,7 +22,7 @@ x = Curve(A, B, C, D, E, F)
 """
 
 def main():
-    c0 = Curve(7, 8, -2, -7, 8, -2180)  # методичка
+    c0 = Curve(70, 80, -20, -70, 80, -2180)  # методичка
     app = QtGui.QApplication(sys.argv)
     ex = Carcass(HyperbolaDrawer(c0))
     sys.exit(app.exec_())

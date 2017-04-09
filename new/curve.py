@@ -64,7 +64,7 @@ class Curve:
                 raise HyperbolaException("wrong starting points")
 
     def get_distance_from_foci(self, p):
-        return abs(geom.dist(p, self.focuses[0]) - geom.dist(p, self.focuses[0])) - self.delta
+        return abs(abs(geom.dist(p, self.focuses[0]) - geom.dist(p, self.focuses[1])) - self.delta)
 
 
 class HyperbolaException(Exception):

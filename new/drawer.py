@@ -22,7 +22,7 @@ class HyperbolaDrawer(Drawer):
         x, y = point
         while abs(x) <= self.size.width()/2 and abs(y) <= self.size.height()/2:
             deltas = [self.curve.get_distance_from_foci(p(x, y)) for p in directs]
-            min_index, min_value= min(enumerate(deltas), key=operator.itemgetter(1))
+            min_index, min_value = min(enumerate(deltas), key=operator.itemgetter(1))
             x, y = directs[min_index](x, y)
             self.draw_point((x, y), qp)
 
