@@ -39,7 +39,7 @@ def get_left_right_points(line):
     left = []
     for f in transform:
         p = f(0, 0)
-        if line[0] * p[0] + line[1]* p[1] + line[2] > 0:
+        if line[0] * p[0] + line[1] * p[1] + line[2] > 0:
             right.append(f)
         elif line[0] * p[0] + line[1] * p[1] + line[2] < 0:
             left.append(f)

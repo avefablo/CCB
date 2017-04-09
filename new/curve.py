@@ -8,8 +8,6 @@ import new.geometry as geom
 class Curve:
     def __init__(self, A, B, C, D, E, F):
         self.A, self.B, self.C, self.D, self.E, self.F = A, B, C, D, E, F
-        # инварианты
-
         # угол
         rotate_angle = pi / 4
         if A != C:  # я проверка угла
@@ -28,11 +26,16 @@ class Curve:
                                        symx * symy - inv2,
                                        symx * symy * symz - inv3],
                                       symx, symy, symz)
-        i = 1 if ans[1][1] < 0 else 0
-        A1 = ans[i][0]
-        C1 = ans[i][1]
-        F1 = -ans[i][2]
-
+        coeffs = list(filter(lambda x: x[1]*x[2] >= 0, ans))
+        if coeffs is None:
+            raise HyperbolaException("not a hyp")
+        coeffs = coeffs[0]
+        if coeffs[0] < 0 and coeffs[1] > 0 and coeffs[2] > 0:
+            coeffs = [-x for x in coeffs]
+            rotate_angle -= pi/2
+        A1 = coeffs[0]
+        C1 = coeffs[1]
+        F1 = -coeffs[2]
         a_can_big = F1 / A1
         b_can_big = F1 / -C1
         a_can = sqrt(a_can_big)
@@ -43,10 +46,7 @@ class Curve:
                                 for x in [(-a_can, 0), (a_can, 0)]]
         self.focuses = [geom.full_translation(x, new_point, rotate_angle)
                         for x in [(-c_can, 0), (c_can, 0)]]
-
-        self.self_check()
         line = (tan(rotate_angle), -1, 0)
-        #self.starting_points = [geom.get_int_point(x) for x in self.starting_points]
         self.left_points, self.right_points = geom.get_left_right_points(line)
 
     def insert_point_into_curve(self, p):
@@ -59,11 +59,11 @@ class Curve:
         for x in self.starting_points:
             t = abs(self.insert_point_into_curve(x))
             ch1 = abs(self.insert_point_into_curve(x)) < 1e-8
-            ch2 = self.get_distance_from_foci(x) < 1e-8
+            ch2 = self.get_distance_from_focuses(x) < 1e-8
             if not (ch1 and ch2):
                 raise HyperbolaException("wrong starting points")
 
-    def get_distance_from_foci(self, p):
+    def get_distance_from_focuses(self, p):
         return abs(abs(geom.dist(p, self.focuses[0]) - geom.dist(p, self.focuses[1])) - self.delta)
 
 
