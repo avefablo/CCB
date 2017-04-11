@@ -2,21 +2,14 @@ import numpy
 import sympy
 from sympy.abc import x as symx, y as symy, z as symz
 from math import atan, sqrt, pi, sin, cos, tan
-import new.geometry as geom
+import geometry as geom
 
 
 class Curve:
     def __init__(self, A, B, C, D, E, F):
         self.A, self.B, self.C, self.D, self.E, self.F = A, B, C, D, E, F
-        # угол
-        rotate_angle = pi / 4
-        if A != C:  # я проверка угла
-            rotate_angle = atan(2 * B / (A - C)) / 2
-        # начало ск
-        new_point = sympy.solve_poly_system([A * symx + B * symy + D,
-                                             B * symx + C * symy + E],
-                                            symx, symy)[0]
-        # нахождение коэффициентов
+        print("{}*x^2 + {}*x*y + {}*y^2 + {}*x + {}*y + {} = 0".format(A, 2*B, C, 2*D, 2*E, F))
+
         inv1 = self.A + self.C
         inv2 = numpy.linalg.det([[self.A, self.B], [self.B, self.C]])
         inv3 = numpy.linalg.det([[self.A, self.B, self.D],
@@ -40,22 +33,25 @@ class Curve:
         a_can = sqrt(a_can_big)
         b_can = sqrt(b_can_big)
         c_can = sqrt(a_can_big + b_can_big)
-        self.delta = 2 * a_can
-        self.starting_points = [(geom.full_translation(x, new_point, rotate_angle))
-                                for x in [(-a_can, 0), (a_can, 0)]]
-        self.focuses = [geom.full_translation(x, new_point, rotate_angle)
-                        for x in [(-c_can, 0), (c_can, 0)]]
-        line = (tan(rotate_angle), -1, 0)
 
-        if not self.self_check():
-            self.starting_points = [geom.rotate_point(x, -pi / 2)
-                                    for x in self.starting_points]
-            self.focuses = [geom.rotate_point(x, -pi / 2)
-                            for x in self.focuses]
-            line = (tan(rotate_angle - pi / 2), -1, 0)
-        if not self.self_check():
-            raise HyperbolaException("wrong starting points")
+        rotate_angle = pi / 4
+        if A != C:  # я проверка угла
+            rotate_angle = atan(2 * B / (A - C)) / 2
+        # начало ск
+        new_point = sympy.solve_poly_system([A * symx + B * symy + D,
+                                             B * symx + C * symy + E],
+                                            symx, symy)[0]
+
+        self.delta = 2 * a_can
+        sys_coord = [
+            geom.SysCoord(rotate_angle, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point),
+            geom.SysCoord(rotate_angle-pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point),
+            geom.SysCoord(rotate_angle+pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point)
+        ]
+        self.starting_points, self.focuses, self.rotate_angle = self.take_syscoord(sys_coord)
+        line = (tan(self.rotate_angle), -1, 0)
         self.left_points, self.right_points = geom.get_left_right_points(line)
+        print(self.rotate_angle)
 
     def insert_point_into_curve(self, p):
         x, y = p
@@ -63,15 +59,20 @@ class Curve:
         return A * x * x + 2 * B * x * y + C * y * y + 2 * D * x + 2 * E * y + F
         # Ax^2 + 2Bxy + Cy^2 + 2Dx + 2Ey + F = 0
 
-    def self_check(self):
-        for x in self.starting_points:
-            t = abs(self.insert_point_into_curve(x))
-            ch1 = abs(self.insert_point_into_curve(x)) < 1e-8
-            ch2 = self.get_distance_from_focuses(x) < 1e-8
-            return ch1 and ch2
+    def take_syscoord(self, sc):
+        for s in sc:
+            for point in s.starting_points:
+                ch1 = abs(self.insert_point_into_curve(point)) < 1e-8
+                ch2 = self.get_distance_from_unproof_focuses(point, s.focuses) < 1e-8
+                if ch1 and ch2:
+                    return s.starting_points, s.focuses, s.rotate_angle
+        raise HyperbolaException('Error occured')
 
     def get_distance_from_focuses(self, p):
         return abs(abs(geom.dist(p, self.focuses[0]) - geom.dist(p, self.focuses[1])) - self.delta)
+
+    def get_distance_from_unproof_focuses(self, p, foc):
+        return abs(abs(geom.dist(p, foc[0]) - geom.dist(p, foc[1])) - self.delta)
 
 
 class HyperbolaException(Exception):

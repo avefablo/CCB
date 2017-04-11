@@ -47,3 +47,12 @@ def get_left_right_points(line):
             left.append(f)
             right.append(f)
     return left, right
+
+
+class SysCoord:
+    def __init__(self, angle, st_pt, foc, zero):
+        self.rotate_angle = angle
+        self.starting_points = [(full_translation(x, zero, angle))
+                                for x in st_pt]
+        self.focuses = [(full_translation(x, zero, angle))
+                        for x in foc]

@@ -1,13 +1,9 @@
-
 import sympy, math, numpy
 from sympy.abc import x as symx, y as symy, z as symz
 
 
 def f(x):
     return a * x + b + c / (x + d)
-
-
-
 
 
 def distPoints(x1, y1, x2, y2):
@@ -71,7 +67,7 @@ def findFocus():
     Q = (fY2 - fY1) / (fX2 - fX1)
     xxx = sympy.solvers.solve(
         a * xK ** 2 + xK * (a * d + d - (fY2 - fY1) / (fX2 - fX1) + fX1 - d) + b * d + c + (fY2 - fY1) * d * fX1 / (
-        fX2 - fX1), xK)
+            fX2 - fX1), xK)
     antosha = sympy.solvers.solve(Q * (xK - fX1) * (xK + d) + fY1 * (xK + d) - a * xK * (xK + d) - b * (xK + d) - c, xK)
     print(xxx)
     print(antosha)
@@ -96,4 +92,3 @@ d = 1
 cF = 0
 findFocus()
 # lineBrez(0,10,10)
-

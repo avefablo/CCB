@@ -1,4 +1,4 @@
-from new.qtcarcas import Carcass, Drawer
+from qtcarcas import Carcass, Drawer
 from PyQt4 import QtGui, QtCore
 import operator
 
@@ -13,15 +13,20 @@ class HyperbolaDrawer(Drawer):
         for x in self.curve.starting_points:
             self.draw_point(x, qp)
         qp.setPen(QtCore.Qt.black)
-        self.brez_process(self.curve.starting_points[0], self.curve.left_points, qp)
         self.brez_process(self.curve.starting_points[1], self.curve.left_points, qp)
-        self.brez_process(self.curve.starting_points[0], self.curve.right_points, qp)
         self.brez_process(self.curve.starting_points[1], self.curve.right_points, qp)
+        self.brez_process(self.curve.starting_points[0], self.curve.left_points, qp)
+        self.brez_process(self.curve.starting_points[0], self.curve.right_points, qp)
 
-    def brez_process(self, point, directs, qp):
+    def brez_process(self, point, directs, qp, verbose=False):
         x, y = point
         while abs(x) <= self.size.width()/2 and abs(y) <= self.size.height()/2:
+            if verbose:
+                print("Current point: {} {}".format(x, y))
+                for fff in directs:
+                    print("\tNew point: {} {}. Dist: {}".format(*fff(x, y), self.curve.get_distance_from_focuses(fff(x, y))))
             deltas = [self.curve.get_distance_from_focuses(p(x, y)) for p in directs]
+
             min_index, min_value = min(enumerate(deltas), key=operator.itemgetter(1))
             x, y = directs[min_index](x, y)
             self.draw_point((x, y), qp)
