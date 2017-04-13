@@ -45,13 +45,13 @@ class Curve:
         self.delta = 2 * a_can
         sys_coord = [
             geom.SysCoord(rotate_angle, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point),
-            geom.SysCoord(rotate_angle-pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point),
-            geom.SysCoord(rotate_angle+pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point)
+            geom.SysCoord(rotate_angle+pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point),
+            geom.SysCoord(rotate_angle-pi/2, [(-a_can, 0), (a_can, 0)], [(-c_can, 0), (c_can, 0)], new_point)
         ]
         self.starting_points, self.focuses, self.rotate_angle = self.take_syscoord(sys_coord)
         line = (tan(self.rotate_angle), -1, 0)
+        print(self.starting_points)
         self.left_points, self.right_points = geom.get_left_right_points(line)
-        print(self.rotate_angle)
 
     def insert_point_into_curve(self, p):
         x, y = p
